@@ -1,21 +1,19 @@
+import { PROVIDERS } from "@/constants/providers";
 import { getAuth } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { deletePostDraftById, getAllPostDraftTopics, getPostDraftById, insertPostDraft, updatePostDraft } from "@/modules/post/post-draft/post-draft.repository";
+import { NextResponse } from "next/server";
 
 // POST: create a draft
 export async function POST(request: Request) {
   const user = await getAuth();
   const { topic, content } = await request.json();
 
-  // Use parameterized query instead of string interpolation
-  await db.query(
-    `INSERT INTO post_drafts (user_id, provider, topic, content, status) 
-     VALUES (?, ?, ?, ?, ?)`,
-    [user.userId, "linkedin", topic?.trim(), content, "draft"]
+  await insertPostDraft(user.userId, topic, content);
+  
+  return NextResponse.json(
+    { message: "Draft saved successfully" },
+    { status: 201 }
   );
-
-  return new Response(JSON.stringify({ message: "Draft saved successfully" }), {
-    status: 201,
-  });
 }
 
 // PUT: update draft title + content
@@ -24,23 +22,16 @@ export async function PUT(request: Request) {
   const { topicId, updatedTopic, updatedContent } = await request.json();
 
   if (!topicId || !updatedTopic || !updatedContent) {
-    return new Response(
-      JSON.stringify({ message: "Missing required fields" }),
+    return NextResponse.json(
+      { message: "Missing required fields" },
       { status: 400 }
     );
   }
 
-  await db.query(
-    `
-    UPDATE post_drafts
-    SET topic = ?, content = ?
-    WHERE user_id = ? AND provider = ? AND id = ?
-    `,
-    [updatedTopic.trim(), updatedContent, user.userId, "linkedin", topicId]
-  );
+  await updatePostDraft(user.userId, topicId, updatedTopic, updatedContent)
 
-  return new Response(
-    JSON.stringify({ message: "Draft updated successfully" }),
+  return NextResponse.json(
+    { message: "Draft updated successfully" },
     { status: 200 }
   );
 }
@@ -52,16 +43,19 @@ export async function GET(request: Request) {
   const user = await getAuth();
 
   if (id) {
-    // Return content for a specific id
-    const [rows] = await db.query(
-      `SELECT content FROM post_drafts WHERE id = ? LIMIT 1`,
-      [id]
+    const rows = await getPostDraftById(Number(id));
+    return NextResponse.json(
+      rows,
+      { status: 200 }
     );
-    return new Response(JSON.stringify(rows), { status: 200 });
   } else {
     // Return all topics
-    const [rows] = await db.query(`SELECT id, topic FROM post_drafts WHERE user_id = ?`,[user.userId]);
-    return new Response(JSON.stringify(rows), { status: 200 });
+    const topics = await getAllPostDraftTopics(user.userId);
+    
+    return NextResponse.json(
+      topics,
+      { status: 200 }
+    );
   }
 }
 
@@ -71,22 +65,16 @@ export async function DELETE(request: Request) {
   const { topicId } = await request.json();
 
   if (!topicId) {
-    return new Response(
-      JSON.stringify({ message: "Missing required fields" }),
+    return NextResponse.json(
+      { message: "Missing required fields" },
       { status: 400 }
     );
   }
 
-  await db.query(
-    `
-    DELETE FROM post_drafts
-    WHERE user_id = ? AND provider = ? AND id = ?
-    `,
-    [user.userId, "linkedin", topicId]
-  );
+  await deletePostDraftById(user.userId, topicId, PROVIDERS.LINKEDIN);
 
-  return new Response(
-    JSON.stringify({ message: "Draft updated successfully" }),
-    { status: 200 }
-  );
+    return NextResponse.json(
+      { message: "Draft updated successfully" },
+      { status: 200 }
+    );
 }
