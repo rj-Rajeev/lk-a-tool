@@ -35,6 +35,8 @@ export async function upsertSchedule(
       POST_STATUS.PENDING,
     ]
   );
+
+  await db.query(`UPDATE post_drafts SET status = 'scheduled' WHERE id = ?`,[draftId])
 }
 
 export async function getScheduleByDraft(

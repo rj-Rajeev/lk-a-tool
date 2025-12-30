@@ -42,3 +42,47 @@ export async function saveToPublish(input: SavePublishInput) {
     connection.release();
   }
 }
+
+export async function getPostPublishedById(
+  draftId: number
+) {
+  const [rows]: any = await db.query(
+    `SELECT 
+       p.id,
+       p.draft_id,
+       p.provider,
+       p.platform_post_id,
+       p.published_at,
+       p.created_at,
+       d.topic,
+       d.content
+     FROM published_posts p
+     JOIN post_drafts d ON p.draft_id = d.id
+     WHERE p.draft_id = ?
+     LIMIT 1`,
+    [draftId]
+  );
+
+  return rows.length ? rows[0] : null;
+}
+
+export async function getAllPostPublishedTopics(userId: number) {
+  const [rows]: any = await db.query(
+    `SELECT 
+       p.id,
+       p.draft_id,
+       p.provider,
+       p.platform_post_id,
+       p.published_at,
+       p.created_at,
+       d.topic,
+       d.content
+     FROM published_posts p
+     JOIN post_drafts d ON p.draft_id = d.id
+     WHERE d.user_id = ?`,
+    [userId]
+  );
+
+  return rows;
+}
+
