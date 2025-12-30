@@ -1,3 +1,5 @@
+import { db } from "@/lib/db";
+
 type UpsertOAuthAccountInput = {
   userId: number;
   provider: "linkedin";
@@ -42,3 +44,14 @@ export async function upsertOAuthAccount(
     ]
   );
 }
+
+export async function getLinkedinAccessToken(user_id: number) {
+  const res: any = await db.query(
+    `SELECT access_token, provider_user_id 
+     FROM oauth_accounts 
+     WHERE provider = 'linkedin' AND user_id = ?`,
+    [user_id]
+  );
+  return res;
+}
+

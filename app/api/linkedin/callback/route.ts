@@ -16,8 +16,9 @@ export async function GET(request: Request) {
         { status: 400 }
       );
     }
-
+    
     const tokenData = await exchangeCodeForToken(code);
+    
     const decoded = decodeLinkedInIdToken(tokenData.id_token);
 
     const email = decoded.email;

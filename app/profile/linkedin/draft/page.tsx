@@ -17,6 +17,7 @@ export default function DraftPage() {
 
   // schedule modal
   const [showSchedule, setShowSchedule] = useState(false);
+  const [posting, setPosting] = useState(false);
   const [dateTime, setDateTime] = useState("");
   const [timezone, setTimezone] = useState("Asia/Kolkata");
 
@@ -36,7 +37,7 @@ export default function DraftPage() {
 
     const res = await fetch(`/api/linkedin/draft?id=${draft.id}`);
     const data = await res.json();
-    setContent(data?.[0]?.content || "");
+    setContent(data?.content || "");
     setLoading(false);
   }
 
@@ -79,6 +80,35 @@ export default function DraftPage() {
     setSaving(false);
     setShowSchedule(false);
   }
+
+  async function postNow() {
+    if (!selectedId) return;
+
+    setPosting(true);
+    try {
+      const res = await fetch("/api/linkedin/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId: selectedId }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to publish post");
+      }
+
+      // optional: remove draft from list after publish
+      setDrafts((prev) => prev.filter((d) => d.id !== selectedId));
+      setSelectedId(null);
+      setTopic("");
+      setContent("");
+    } catch (err) {
+      console.error(err);
+      alert("Post failed. Check logs.");
+    } finally {
+      setPosting(false);
+    }
+  }
+
 
   async function deleteDraft() {
     if (!selectedId) return;
@@ -165,11 +195,20 @@ export default function DraftPage() {
 
                 <div className="flex gap-3">
                   <button
+                    onClick={postNow}
+                    disabled={posting}
+                    className="h-10 px-4 rounded-md bg-black text-white text-sm font-medium"
+                  >
+                    {posting ? "Posting…" : "Post Now"}
+                  </button>
+
+                  <button
                     onClick={() => setShowSchedule(true)}
                     className="h-10 px-4 rounded-md border text-sm"
                   >
                     Schedule
                   </button>
+
                   <button
                     onClick={saveDraft}
                     disabled={saving}
@@ -178,6 +217,7 @@ export default function DraftPage() {
                     {saving ? "Saving…" : "Save"}
                   </button>
                 </div>
+
               </div>
             )}
           </div>
