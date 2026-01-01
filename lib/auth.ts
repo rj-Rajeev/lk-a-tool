@@ -4,14 +4,15 @@ import jwt from "jsonwebtoken";
 type AppTokenPayload = {
   userId: number;
   email: string;
+  picture: string;
 };
 
-export const getAuth = async (): Promise<AppTokenPayload> => {
+export const getAuth = async (): Promise<AppTokenPayload | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get("AppToken")?.value;
 
   if (!token) {
-    throw new Error("Unauthorized");
+    return null;
   }
 
   try {
@@ -22,7 +23,7 @@ export const getAuth = async (): Promise<AppTokenPayload> => {
 
     return payload;
   } catch {
-    throw new Error("Invalid token");
+    return null;
   }
 };
 
