@@ -7,6 +7,12 @@ import { generateLinkedInPost } from "@/modules/ai/ai.service";
 export async function POST(request: Request) {
   try {
     const auth = await getAuth();
+    if(!auth){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const { topic } = await request.json();
 
     if (!topic) {

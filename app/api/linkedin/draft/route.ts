@@ -6,6 +6,12 @@ import { NextResponse } from "next/server";
 // POST: create a draft
 export async function POST(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
   const { topic, content } = await request.json();
 
   await insertPostDraft(user.userId, topic, content);
@@ -19,6 +25,12 @@ export async function POST(request: Request) {
 // PUT: update draft title + content
 export async function PUT(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
   const { topicId, updatedTopic, updatedContent } = await request.json();
 
   if (!topicId || !updatedTopic || !updatedContent) {
@@ -41,6 +53,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   if (id) {
     const rows = await getPostDraftById(Number(id));
@@ -62,7 +80,15 @@ export async function GET(request: Request) {
 // PUT: update draft title + content
 export async function DELETE(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+  
   const { topicId } = await request.json();
+
 
   if (!topicId) {
     return NextResponse.json(

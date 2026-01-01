@@ -11,6 +11,13 @@ import {
 export async function POST(request: Request) {
   try {
     const user = await getAuth();
+    if(!user){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const { draftId, scheduledAt, timezone } = await request.json();
 
     if (!draftId || !scheduledAt || !timezone) {
@@ -37,6 +44,12 @@ export async function POST(request: Request) {
 // GET: schedules
 export async function GET(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
   const { searchParams } = new URL(request.url);
   const draftId = searchParams.get("draftId");
 
@@ -51,6 +64,12 @@ export async function GET(request: Request) {
 // PUT: update schedule
 export async function PUT(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
   const { draftId, scheduledAt, timezone } = await request.json();
 
   if (!draftId || !scheduledAt || !timezone) {
@@ -73,6 +92,12 @@ export async function PUT(request: Request) {
 // DELETE: cancel schedule
 export async function DELETE(request: Request) {
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
   const { draftId } = await request.json();
 
   if (!draftId) {

@@ -9,6 +9,12 @@ import {
 export async function GET() {
   try {
     const user = await getAuth();
+    if(!user){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const config = await getPromptConfig(
       user.userId,
@@ -30,6 +36,12 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await getAuth();
+    if(!user){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
     const data = await request.json();
 
     const promptConfigId = await savePromptConfig(

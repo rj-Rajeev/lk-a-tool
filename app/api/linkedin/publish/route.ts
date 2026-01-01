@@ -9,6 +9,12 @@ export async function POST(request: Request) {
   try {
     const { draftId } = await request.json();
     const user = await getAuth();
+    if(!user){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const draftPost = await getPostDraftById(draftId);
 
@@ -49,6 +55,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const user = await getAuth();
+  if(!user){
+    return NextResponse.json(
+      { message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   if (id) {
     const rows = await getPostPublishedById(Number(id));

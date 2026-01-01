@@ -7,6 +7,12 @@ import { generateLinkedInTopics } from "@/modules/ai/topic.service";
 export async function GET() {
   try {
     const auth = await getAuth();
+    if(!auth){
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const config = await getPromptConfigByUser(
       auth.userId,
