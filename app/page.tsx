@@ -1,5 +1,3 @@
-// app/page.tsx (SERVER COMPONENT)
-
 import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth";
 
@@ -10,6 +8,8 @@ export default async function LandingPage() {
   if (user) {
     redirect("/profile/linkedin");
   }
+
+  
 
   return (
     <div className="min-h-screen bg-bg text-text">

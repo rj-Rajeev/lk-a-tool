@@ -14,7 +14,7 @@ export const exchangeCodeForToken = async (
     code,
     client_id: process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID!,
     client_secret: process.env.LINKEDIN_CLIENT_SECRET!,
-    redirect_uri: process.env.LINKEDIN_REDIRECT_URI!,
+    redirect_uri: process.env.NEXT_PUBLIC_LINKEDIN_REDIRECT_URI!,
   });
 
   const res = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {

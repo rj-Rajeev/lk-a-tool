@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { draftId, scheduledAt, timezone } = await request.json();
+    const { draftId, scheduledAt, timezone = 'utc' } = await request.json();
 
     if (!draftId || !scheduledAt || !timezone) {
       return NextResponse.json(
@@ -70,7 +70,7 @@ export async function PUT(request: Request) {
       { status: 401 }
     );
   }
-  const { draftId, scheduledAt, timezone } = await request.json();
+  const { draftId, scheduledAt, timezone = 'utc' } = await request.json();
 
   if (!draftId || !scheduledAt || !timezone) {
     return NextResponse.json(

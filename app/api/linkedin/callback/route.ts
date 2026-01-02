@@ -18,6 +18,8 @@ export async function GET(request: Request) {
     }
     
     const tokenData = await exchangeCodeForToken(code);
+    console.log(tokenData.access_token);
+
     
     const decoded = decodeLinkedInIdToken(tokenData.id_token);
 
@@ -54,6 +56,8 @@ export async function GET(request: Request) {
     setAuthCookie(response, appToken);
     return response;
   } catch (err: unknown) {
+    console.log(err);
+    
     return NextResponse.json(err, { status: 500 });
   }
 }
