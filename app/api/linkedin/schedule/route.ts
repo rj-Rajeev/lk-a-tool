@@ -18,16 +18,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const { draftId, scheduledAt, timezone = 'utc' } = await request.json();
+    const { draftId, scheduledAt} = await request.json();
 
-    if (!draftId || !scheduledAt || !timezone) {
+    if (!draftId || !scheduledAt) {
       return NextResponse.json(
         { message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    await schedulePost(user.userId, draftId, scheduledAt, timezone);
+    await schedulePost(user.userId, draftId, scheduledAt);
 
     return NextResponse.json(
       { message: "Post scheduled successfully" },
@@ -70,9 +70,9 @@ export async function PUT(request: Request) {
       { status: 401 }
     );
   }
-  const { draftId, scheduledAt, timezone = 'utc' } = await request.json();
+  const { draftId, scheduledAt} = await request.json();
 
-  if (!draftId || !scheduledAt || !timezone) {
+  if (!draftId || !scheduledAt) {
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 }
@@ -82,8 +82,7 @@ export async function PUT(request: Request) {
   await updateScheduledPost(
     user.userId,
     draftId,
-    scheduledAt,
-    timezone
+    scheduledAt
   );
 
   return NextResponse.json({ message: "Schedule updated" });

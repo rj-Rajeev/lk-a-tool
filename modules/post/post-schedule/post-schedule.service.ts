@@ -1,3 +1,4 @@
+import { isoToMysql } from "@/utils/auth/date.utils";
 import {
   draftBelongsToUser,
   upsertSchedule,
@@ -11,12 +12,11 @@ export async function schedulePost(
   userId: number,
   draftId: number,
   scheduledAt: string,
-  timezone: string
 ) {
   const ownsDraft = await draftBelongsToUser(draftId, userId);
   if (!ownsDraft) throw new Error("Draft not found");
 
-  await upsertSchedule(draftId, scheduledAt, timezone);
+  await upsertSchedule(draftId, isoToMysql(scheduledAt));
 }
 
 export async function getSchedules(
@@ -32,10 +32,9 @@ export async function getSchedules(
 export async function updateScheduledPost(
   userId: number,
   draftId: number,
-  scheduledAt: string,
-  timezone: string
+  scheduledAt: string
 ) {
-  await updateSchedule(draftId, userId, scheduledAt, timezone);
+  await updateSchedule(draftId, userId, isoToMysql(scheduledAt));
 }
 
 export async function cancelScheduledPost(

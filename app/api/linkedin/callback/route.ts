@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { signToken } from "@/lib/auth";
 import { exchangeCodeForToken } from "@/modules/oauth/linkedin.client";
 import { decodeLinkedInIdToken } from "@/utils/auth/jwt.utils";
-import { setAuthCookie } from "@/utils/auth/cookies";
+import { setAuthCookie, setSessionHintCookie } from "@/utils/auth/cookies";
 import { handleLinkedInDbAuth } from "@/modules/oauth/linkedin-auth.service";
 
 export async function GET(request: Request) {
@@ -18,8 +18,6 @@ export async function GET(request: Request) {
     }
     
     const tokenData = await exchangeCodeForToken(code);
-    console.log(tokenData.access_token);
-
     
     const decoded = decodeLinkedInIdToken(tokenData.id_token);
 
@@ -54,10 +52,13 @@ export async function GET(request: Request) {
     );
 
     setAuthCookie(response, appToken);
+    setSessionHintCookie(response, userId);
     return response;
   } catch (err: unknown) {
-    console.log(err);
-    
-    return NextResponse.json(err, { status: 500 });
+    return NextResponse.json({
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    },
+    { status: 500 });
   }
 }

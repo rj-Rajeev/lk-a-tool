@@ -19,7 +19,6 @@ export default function DraftPage() {
   const [showSchedule, setShowSchedule] = useState(false);
   const [posting, setPosting] = useState(false);
   const [dateTime, setDateTime] = useState("");
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
 
   // fetch drafts
   useEffect(() => {
@@ -65,15 +64,14 @@ export default function DraftPage() {
 
   async function schedulePost() {
     if (!selectedId || !dateTime) return;
-
+    
     setSaving(true);
     await fetch("/api/linkedin/schedule", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         draftId: selectedId,
-        scheduledAt: dateTime,
-        timezone,
+        scheduledAt: new Date(dateTime).toISOString(),
       }),
     });
 
@@ -243,20 +241,6 @@ export default function DraftPage() {
                 onChange={(e) => setDateTime(e.target.value)}
                 className="w-full h-10 px-3 mt-1 text-sm border rounded-md"
               />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Timezone</label>
-              <select
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-                className="w-full h-10 px-3 mt-1 text-sm border rounded-md"
-              >
-                <option value="Asia/Kolkata">Asia/Kolkata</option>
-                <option value="UTC">UTC</option>
-                <option value="America/New_York">America/New_York</option>
-                <option value="Europe/London">Europe/London</option>
-              </select>
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

@@ -25,9 +25,6 @@ export async function GET(request: Request) {
         ) AS t
     )
     `);
-
-    console.log(lockResult);
-    
     
 
     if (lockResult.affectedRows === 0) {

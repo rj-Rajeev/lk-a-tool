@@ -16,21 +16,18 @@ export async function draftBelongsToUser(
 export async function upsertSchedule(
   draftId: number,
   scheduledAt: string,
-  timezone: string
 ) {
   await db.query(
     `
-    INSERT INTO scheduled_posts (draft_id, scheduled_at, timezone, status)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO scheduled_posts (draft_id, scheduled_at, status)
+    VALUES (?, ?, ?)
     ON DUPLICATE KEY UPDATE
       scheduled_at = VALUES(scheduled_at),
-      timezone = VALUES(timezone),
       status = ?
     `,
     [
       draftId,
       scheduledAt,
-      timezone,
       POST_STATUS.PENDING,
       POST_STATUS.PENDING,
     ]
@@ -58,7 +55,7 @@ export async function getScheduleByDraft(
 export async function getAllSchedules(userId: number) {
   const [rows] = await db.query<RowDataPacket[]>(
     `
-    SELECT s.id, s.draft_id, s.scheduled_at, s.timezone, s.status, d.topic
+    SELECT s.id, s.draft_id, s.scheduled_at, s.status, d.topic
     FROM scheduled_posts s
     JOIN post_drafts d ON d.id = s.draft_id
     WHERE d.user_id = ?
@@ -66,23 +63,23 @@ export async function getAllSchedules(userId: number) {
     `,
     [userId]
   );
+  
   return rows;
 }
 
 export async function updateSchedule(
   draftId: number,
   userId: number,
-  scheduledAt: string,
-  timezone: string
+  scheduledAt: string
 ) {
   await db.query(
     `
     UPDATE scheduled_posts s
     JOIN post_drafts d ON d.id = s.draft_id
-    SET s.scheduled_at = ?, s.timezone = ?, s.status = ?
+    SET s.scheduled_at = ?, s.status = ?
     WHERE s.draft_id = ? AND d.user_id = ?
     `,
-    [scheduledAt, timezone, POST_STATUS.PENDING, draftId, userId]
+    [scheduledAt, POST_STATUS.PENDING, draftId, userId]
   );
 }
 
