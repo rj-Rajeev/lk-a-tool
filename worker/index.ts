@@ -1,18 +1,14 @@
 import { Worker } from "bullmq";
-import IORedis from "ioredis";
-
 // import shared code from web
 import { db } from "@web/lib/db";
+import {redis} from "@web/lib/redis"
 import { postOnLinkedin } from "@web/modules/post/post-publish/post-publish.service";
+import { cronPublishJob } from "./worker.cron";
+
 
 console.log("🚀 Worker started");
 
-// Redis connection (MUST match web)
-const redis = new IORedis({
-  host: process.env.REDIS_HOST || "redis",
-  port: 6379,
-  maxRetriesPerRequest: null,
-});
+cronPublishJob.start();
 
 new Worker(
   "linkedin-publish",

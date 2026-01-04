@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { postOnLinkedin } from "@/modules/post/post-publish/post-publish.service";
 import { publishQueue } from "@/lib/queues/publish.queue";
 
+
+
 export async function GET(request: Request) {
   const connection = await db.getConnection();
 

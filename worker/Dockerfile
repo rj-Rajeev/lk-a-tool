@@ -11,7 +11,7 @@ WORKDIR /app/worker
 RUN npm install
 
 # Copy worker source
-COPY worker/index.ts ./index.ts
+COPY worker/ .
 
 # Copy shared web code (NO node_modules)
 WORKDIR /app
