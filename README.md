@@ -89,15 +89,10 @@ REDIS_HOST=redis
 
 ### 1. Clone the repository
 
-```bash
-git clone <your-repo-url>
-cd <project-folder>
-```
-
 ### 2. Create `.env`
 
 ```bash
-cp .env.example .env
+cp main/.env.example main/.env
 ```
 
 Fill in the values.

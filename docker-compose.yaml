@@ -1,4 +1,11 @@
 services:
+  web:
+    build:
+      context: .
+      dockerfile: main/Dockerfile
+    ports:
+      - "3000:3000"
+ 
   db:
     image: mysql:8.0.44-debian
     ports:
