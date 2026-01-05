@@ -1,14 +1,16 @@
 import { Worker } from "bullmq";
 // import shared code from web
-import { db } from "@web/lib/db";
-import {redis} from "@web/lib/redis"
-import { postOnLinkedin } from "@web/modules/post/post-publish/post-publish.service";
+import { db } from "@/lib/db";
+import {redis} from "@/lib/redis"
+import { postOnLinkedin } from "@/modules/post/post-publish/post-publish.service";
 import { cronPublishJob } from "./worker.cron";
 
 
 console.log("🚀 Worker started");
 
 cronPublishJob.start();
+
+
 
 new Worker(
   "linkedin-publish",
