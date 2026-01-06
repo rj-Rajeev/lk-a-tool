@@ -4,6 +4,7 @@ import { LinkedInSettingsForm } from "@/components/LinkedInSettingsForm";
 import GeneratePost from "@/components/settings/GeneratePost";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import ProfileSection from "@/components/ProfileSection";
 
 type User = {
   sub?: string | null;
@@ -66,55 +67,7 @@ export default function LinkedInSettingsPage() {
         </div>
 
         {/* Profile + Actions Card */}
-        <div className="card flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
-          {/* Profile Info */}
-          <div className="flex items-center gap-4">
-            <img
-              src={user.picture || ""}
-              alt="Profile"
-              className="w-16 h-16 rounded-full object-cover border border-border"
-            />
-
-            <div>
-              <h3 className="font-semibold leading-tight">
-                {user.name || "Unnamed User"}
-              </h3>
-              <p className="text-sm text-text-secondary">
-                {user.email || "No email"}
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                LinkedIn connected ✓
-              </p>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 justify-start md:justify-end">
-            <GeneratePost />
-
-            <button
-              onClick={() => router.push("/profile/linkedin/draft")}
-              className="btn-secondary"
-            >
-              View Drafts
-            </button>
-
-            <button
-              onClick={() => router.push("/profile/linkedin/schedule")}
-              className="btn-secondary"
-            >
-              Scheduled Posts
-            </button>
-
-            <button
-              onClick={() => alert("Coming soon")}
-              className="btn-secondary"
-            >
-              Analytics
-            </button>
-          </div>
-        </div>
+        <ProfileSection user={user} provider="linkedin" />
 
         {/* Automation Settings */}
         <div className="card">
