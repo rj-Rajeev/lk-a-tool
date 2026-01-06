@@ -42,7 +42,6 @@ services:
       DB_USER: app_user
       DB_PASSWORD: apppass
       DB_NAME: app_db
-      OPENAI_API_KEY: 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
     restart: always
 
 volumes:
