@@ -54,6 +54,7 @@ export async function POST(req: Request) {
     times,
     start_date,
     end_date,
+    is_active
   } = body;
 
   if (!provider || !rule_type || !times || !start_date) {
@@ -82,14 +83,14 @@ export async function POST(req: Request) {
       end_date,
       is_active
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE
       rule_type   = VALUES(rule_type),
       days        = VALUES(days),
       times       = VALUES(times),
       start_date  = VALUES(start_date),
       end_date    = VALUES(end_date),
-      is_active   = 1,
+      is_active   = VALUES(is_active),
       updated_at  = CURRENT_TIMESTAMP
     `,
     [
@@ -100,6 +101,7 @@ export async function POST(req: Request) {
       JSON.stringify(times),
       start_date,
       end_date || null,
+      is_active || 0
     ]
   );
 

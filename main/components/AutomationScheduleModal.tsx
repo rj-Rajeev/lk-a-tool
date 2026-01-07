@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDateToLocalISO } from "@/utils/dateTimeFormetter";
+import { formatDateToLocalISO, formatTimeToLocalISO } from "@/utils/dateTimeFormetter";
 import { useEffect, useState } from "react";
 
 export default function AutomationScheduleModal({
@@ -12,6 +12,8 @@ export default function AutomationScheduleModal({
 }) {
   const [ruleType, setRuleType] =
     useState<"daily" | "alternate" | "specific_days">("daily");
+
+  const [errors, setErrors] = useState<{startDate?: boolean; time?: boolean; }>({});
 
   const [startDate, setStartDate] = useState(""); // YYYY-MM-DD (local)
   const [endDate, setEndDate] = useState("");     // YYYY-MM-DD (optional)
@@ -29,8 +31,17 @@ export default function AutomationScheduleModal({
   }
 
   async function save() {
-    if (!startDate || !time) return;
+    const newErrors: any = {};
 
+      if (!startDate) newErrors.startDate = true;
+      if (!time) newErrors.time = true;
+
+      setErrors(newErrors);
+
+      if (Object.keys(newErrors).length > 0) {
+        return; // stop submit
+      }
+  
     setLoading(true);
 
     await fetch("/api/automation-schedule", {
@@ -41,9 +52,9 @@ export default function AutomationScheduleModal({
         rule_type: ruleType,
 
         // ✅ RAW LOCAL VALUES
-        start_date: startDate,
-        end_date: endDate || null,
-        times: [time],
+        start_date: new Date(startDate+" "+time).toISOString().split('T')[0],
+        end_date: endDate && time ? new Date(endDate+" "+time).toISOString().split('T')[0] : null,
+        times: [new Date(startDate+" "+time).toISOString().slice(11,19)],
         days: ruleType === "specific_days" ? days : null,
         is_active: isActive ? 1 : 0,
       }),
@@ -57,14 +68,13 @@ export default function AutomationScheduleModal({
     const res = await fetch('/api/automation-schedule?provider=linkedin');
     const data = await res.json();
 
-    let startDate = formatDateToLocalISO(new Date(data[0].start_date)).split('T')[0];
-
-    setStartDate(startDate);
-    let endDate = formatDateToLocalISO(new Date(data[0].end_date)).split('T')[0];
-    setEndDate(endDate);
     
-    //TODO: ---------------
-    setTime(data[0]?.times[1]);
+    let startDate = formatDateToLocalISO(new Date(data[0].start_date.split('T')[0]+'T'+data[0].times[0]+'Z')).split('T')[0];
+    setStartDate(startDate);
+    let endDate = formatDateToLocalISO(new Date(data[0].end_date.split('T')[0]+'T'+data[0].times[0]+'Z')).split('T')[0];
+    setEndDate(endDate);
+    let localTime = formatTimeToLocalISO(new Date(data[0].start_date.split('T')[0]+'T'+data[0].times[0]+'Z'))
+    setTime(localTime);
     setIsActive(data[0]?.is_active);
   }
 
@@ -136,8 +146,11 @@ export default function AutomationScheduleModal({
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="input"
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setErrors((prev) => ({ ...prev, startDate: false }));
+            }}
+            className={`input ${errors.startDate ? "border-red-500 ring-1 ring-red-500" : ""}`}
           />
         </div>
 
@@ -147,6 +160,7 @@ export default function AutomationScheduleModal({
           <input
             type="date"
             value={endDate}
+            min={startDate || undefined}
             onChange={(e) => setEndDate(e.target.value)}
             className="input"
           />
@@ -158,8 +172,11 @@ export default function AutomationScheduleModal({
           <input
             type="time"
             value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="input"
+            onChange={(e) => {
+              setTime(e.target.value);
+              setErrors((prev) => ({ ...prev, time: false }));
+            }}
+            className={`input ${errors.time ? "border-red-500 ring-1 ring-red-500" : ""}`}
           />
         </div>
 
