@@ -34,17 +34,17 @@ export async function postAutomationWorker() {
 
             const topics = await generateLinkedInTopics(config);
             
-            console.log('topic->',topics[0]);
+            // console.log('topic---------------');
 
         // generaet post
 
             const content = await generateLinkedInPost(topics[0], config);
-            console.log('content->',content);
+            // console.log('content------------');
 
         // save to draft
 
             
-            console.log('draft saved---');
+            // console.log('draft saved---');
             
             await insertPostDraft(automation_scedules[0].user_id, topics[0], content);
 
@@ -55,9 +55,8 @@ export async function postAutomationWorker() {
             WHERE id = ?;
             `,[automation_scedules[0].id])
 
-            console.log(data,'----update db');
+            // console.log(data,'----update db');
             
-
         
     }catch(error){
         console.log(error);

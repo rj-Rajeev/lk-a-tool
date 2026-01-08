@@ -30,7 +30,7 @@ export async function schedulerWorker() {
     `);
 
     if (lockResult.affectedRows === 0) {
-        console.log("Scheduled Not Found At", new Date().toLocaleString());
+        console.log("Scheduled Not Found At", new Date());
         
       await connection.commit();
       return;
