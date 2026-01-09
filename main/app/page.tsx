@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth";
+import { useFcmToken } from "@/hooks/useFcmToken";
+import FcmBridge from "@/components/FcmBridge";
 
 export default async function LandingPage() {
   const user = await getAuth();
@@ -9,10 +11,9 @@ export default async function LandingPage() {
     redirect("/profile/linkedin");
   }
 
-  
-
   return (
     <div className="min-h-screen bg-bg text-text">
+      <FcmBridge/>
       <div className="max-w-6xl mx-auto px-6 py-24 space-y-24">
 
         {/* HERO */}
