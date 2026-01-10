@@ -1,5 +1,6 @@
 "use client";
 
+import { useFcmToken } from "@/hooks/useFcmToken";
 import { formatDateToLocalISO, formatTimeToLocalISO } from "@/utils/dateTimeFormetter";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,8 @@ export default function AutomationScheduleModal({
   provider: "linkedin";
   onClose: () => void;
 }) {
+
+  const { token, requestToken } = useFcmToken();
   const [ruleType, setRuleType] =
     useState<"daily" | "alternate" | "specific_days">("daily");
 
@@ -31,6 +34,10 @@ export default function AutomationScheduleModal({
   }
 
   async function save() {
+    setLoading(true);
+
+    await requestToken();
+    
     const newErrors: any = {};
 
       if (!startDate) newErrors.startDate = true;
@@ -41,9 +48,6 @@ export default function AutomationScheduleModal({
       if (Object.keys(newErrors).length > 0) {
         return; // stop submit
       }
-  
-    setLoading(true);
-
     await fetch("/api/automation-schedule", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
