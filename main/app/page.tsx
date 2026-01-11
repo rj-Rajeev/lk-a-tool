@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth";
-import { useFcmToken } from "@/hooks/useFcmToken";
-import FcmBridge from "@/components/FcmBridge";
 
 export default async function LandingPage() {
   const user = await getAuth();
