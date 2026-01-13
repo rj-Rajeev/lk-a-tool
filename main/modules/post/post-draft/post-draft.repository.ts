@@ -8,11 +8,13 @@ type DraftPost = {
 };
 
 export async function insertPostDraft(userId: number, topic: string, content: string) {
-    await db.query(
+    const [data]:any =await db.query(
         `INSERT INTO post_drafts (user_id, provider, topic, content, status) 
             VALUES (?, ?, ?, ?, ?)`,
         [userId, "linkedin", topic?.trim(), content, "draft"]
     );
+
+    return data;
 
 }
 

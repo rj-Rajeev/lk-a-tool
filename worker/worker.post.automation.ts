@@ -4,6 +4,7 @@ import { getPromptConfigByUser } from "@/modules/prompt/prompt-config.repository
 import { generateLinkedInTopics } from "@/modules/ai/topic.service";
 import { generateLinkedInPost } from "@/modules/ai/ai.service";
 import { insertPostDraft } from "@/modules/post/post-draft/post-draft.repository";
+import { notifyDraftCreated } from "@/lib/sendDraftCreatedNotification";
 
 
 export async function postAutomationWorker() {
@@ -46,7 +47,11 @@ export async function postAutomationWorker() {
             
             // console.log('draft saved---');
             
-            await insertPostDraft(automation_scedules[0].user_id, topics[0], content);
+            const draft = await insertPostDraft(automation_scedules[0].user_id, topics[0], content);
+
+            //notify user about draft
+
+            notifyDraftCreated(automation_scedules[0].user_id, draft[0].id);
 
         //
 
