@@ -10,9 +10,11 @@ function parseTopics(content: string): string[] {
 
 export async function generateLinkedInTopics(config: any) {
   const prompt = buildLinkedInTopicsPrompt(config);
+  
+console.log('-----------------------\n',prompt);
 
   const response = await aiClient.chat.completions.create({
-    model: "openai/gpt-3.5-turbo",
+    model: "gemini-3-flash-preview",
     messages: [
       { role: "system", content: prompt },
       {
@@ -21,6 +23,9 @@ export async function generateLinkedInTopics(config: any) {
       },
     ],
   });
+
+console.log('--------------------------',response);
+
 
   const content = response.choices[0]?.message?.content ?? "";
   return parseTopics(content);

@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
 export const aiClient = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
+  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
   apiKey: process.env.OPENROUTER_API_KEY!,
 });

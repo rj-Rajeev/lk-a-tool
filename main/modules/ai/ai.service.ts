@@ -8,7 +8,7 @@ export async function generateLinkedInPost(
   const prompt = buildLinkedInPrompt(topic, config);
 
   const response = await aiClient.chat.completions.create({
-    model:  "openai/gpt-3.5-turbo",
+    model:  "gemini-3-flash-preview",
     messages: [
       { role: "system", content: prompt },
       {

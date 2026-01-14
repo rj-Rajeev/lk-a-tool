@@ -32,10 +32,11 @@ export async function postAutomationWorker() {
               automation_scedules[0].user_id,
               PROVIDERS.LINKEDIN
             );
+            
 
             const topics = await generateLinkedInTopics(config);
             
-            // console.log('topic---------------');
+            console.log('topic---------------', topics);
 
         // generaet post
 
