@@ -11,10 +11,10 @@ function parseTopics(content: string): string[] {
 export async function generateLinkedInTopics(config: any) {
   const prompt = buildLinkedInTopicsPrompt(config);
   
-console.log('-----------------------\n',prompt);
+// console.log('-----------------------\n',prompt);
 
   const response = await aiClient.chat.completions.create({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash",
     messages: [
       { role: "system", content: prompt },
       {
@@ -24,7 +24,7 @@ console.log('-----------------------\n',prompt);
     ],
   });
 
-console.log('--------------------------',response);
+// console.log('--------------------------',response);
 
 
   const content = response.choices[0]?.message?.content ?? "";

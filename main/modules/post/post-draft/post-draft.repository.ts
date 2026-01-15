@@ -7,16 +7,20 @@ type DraftPost = {
   status: string
 };
 
-export async function insertPostDraft(userId: number, topic: string, content: string) {
-    const [data]:any =await db.query(
-        `INSERT INTO post_drafts (user_id, provider, topic, content, status) 
-            VALUES (?, ?, ?, ?, ?)`,
-        [userId, "linkedin", topic?.trim(), content, "draft"]
-    );
+export async function insertPostDraft(
+  userId: number,
+  topic: string,
+  content: string
+) {
+  const [result]: any = await db.query(
+    `INSERT INTO post_drafts (user_id, provider, topic, content, status) 
+     VALUES (?, ?, ?, ?, ?)`,
+    [userId, "linkedin", topic?.trim(), content, "draft"]
+  );
 
-    return data;
-
+  return result.insertId;
 }
+
 
 export async function updatePostDraft(userId: number, topicId: number, updatedTopic: string, updatedContent: string) {
     await db.query(

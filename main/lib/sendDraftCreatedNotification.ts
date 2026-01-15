@@ -9,7 +9,7 @@ export async function notifyDraftCreated(
 
   if (!tokens.length) return;
 
-  await sendPushToTokens(tokens, {
+  const res = await sendPushToTokens(tokens, {
     title: 'Draft ready for review',
     body: 'Your automation created a draft. Review it now.',
     data: {
@@ -18,4 +18,8 @@ export async function notifyDraftCreated(
       type: 'DRAFT_READY',
     },
   });
+    console.log('----------notification------>>',res);
+
+
+  return res;
 }

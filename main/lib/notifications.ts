@@ -1,5 +1,6 @@
 // lib/notifications.ts
 import type { messaging } from 'firebase-admin';
+import { db } from './db';
 
 let adminMessaging: messaging.Messaging | null = null;
 
@@ -58,6 +59,7 @@ export async function sendPushToTokens(
 
   const messaging = await getMessaging();
 
+
   const response = await messaging.sendEachForMulticast({
     tokens,
     notification: {
@@ -81,6 +83,13 @@ export async function sendPushToTokens(
       }
     }
   });
+
+  if (invalidTokens.length > 0) {
+    await db.query(
+      'DELETE FROM user_fcm_tokens WHERE fcm_token IN (?)',
+      [invalidTokens]
+    );
+  }
 
   return {
     successCount: response.successCount,

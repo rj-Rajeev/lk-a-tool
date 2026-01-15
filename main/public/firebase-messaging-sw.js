@@ -31,7 +31,7 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   // Customize notification here
-  console.log("Notification received:", JSON.stringify(payload, null, 2));
+  // console.log("Notification received:", JSON.stringify(payload, null, 2));
   
   const notificationTitle = payload.notification?.title || payload.data?.title || "New Notification";
   const notificationOptions = {
