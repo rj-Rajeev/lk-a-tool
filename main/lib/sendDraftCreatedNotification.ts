@@ -9,16 +9,15 @@ export async function notifyDraftCreated(
 
   if (!tokens.length) return;
 
-  const res = await sendPushToTokens(tokens, {
-    title: 'Draft ready for review',
-    body: 'Your automation created a draft. Review it now.',
-    data: {
-      draftId,
-      url: `/drafts/${draftId}`,
-      type: 'DRAFT_READY',
-    },
-  });
-    console.log('----------notification------>>',res);
+    const res = await sendPushToTokens(tokens, {
+      title: 'Draft ready for review',
+      body: 'Your automation created a draft. Review it now.',
+      data: {
+        draftId: String(draftId),
+        url: `/drafts/${String(draftId)}`,
+        type: 'DRAFT_READY',
+      },
+    });
 
 
   return res;
