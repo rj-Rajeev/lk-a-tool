@@ -1,6 +1,6 @@
 import { PROVIDERS } from "@/constants/providers";
 import { getAuth } from "@/lib/auth";
-import { deletePostDraftById, getAllPostDraftTopics, getPostDraftById, insertPostDraft, updatePostDraft } from "@/modules/post/post-draft/post-draft.repository";
+import { approvePostDraft, deletePostDraftById, getAllPostDraftTopics, getPostDraftById, insertPostDraft, updatePostDraft } from "@/modules/post/post-draft/post-draft.repository";
 import { NextResponse } from "next/server";
 
 // POST: create a draft
@@ -25,22 +25,47 @@ export async function POST(request: Request) {
 // PUT: update draft title + content
 export async function PUT(request: Request) {
   const user = await getAuth();
-  if(!user){
+  if (!user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const {
+    topicId,
+    updatedTopic,
+    updatedContent,
+    is_approved = false,
+  } = await request.json();
+
+  if (!topicId) {
     return NextResponse.json(
-      { message: "Unauthorized" },
-      { status: 401 }
+      { message: "Missing Draft Id" },
+      { status: 400 }
     );
   }
-  const { topicId, updatedTopic, updatedContent } = await request.json();
 
-  if (!topicId || !updatedTopic || !updatedContent) {
+  // 🔹 APPROVE ONLY
+  if (is_approved) {
+    await approvePostDraft(user.userId, topicId);
+    return NextResponse.json(
+      { message: "Draft approved & scheduled" },
+      { status: 200 }
+    );
+  }
+
+  // 🔹 UPDATE ONLY
+  if (!updatedTopic || !updatedContent) {
     return NextResponse.json(
       { message: "Missing required fields" },
       { status: 400 }
     );
   }
 
-  await updatePostDraft(user.userId, topicId, updatedTopic, updatedContent)
+  await updatePostDraft(
+    user.userId,
+    topicId,
+    updatedTopic,
+    updatedContent
+  );
 
   return NextResponse.json(
     { message: "Draft updated successfully" },

@@ -14,7 +14,7 @@ export async function notifyDraftCreated(
       body: 'Your automation created a draft. Review it now.',
       data: {
         draftId: String(draftId),
-        url: `/drafts/${String(draftId)}`,
+        url: `/profile/linkedin/draft/${String(draftId)}`,
         type: 'DRAFT_READY',
       },
     });

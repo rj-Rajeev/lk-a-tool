@@ -2,6 +2,7 @@ import { db } from "../main/lib/db";
 import { publishQueue } from "@/lib/queues/publish.queue";
 import { CronJob } from "cron";
 import { postAutomationWorker } from "worker.post.automation";
+import { automationPublishWorker } from "worker.post.automation.publish";
 
 export async function schedulerWorker() {
   const connection = await db.getConnection();
@@ -99,6 +100,7 @@ export const cronPublishJob = new CronJob(
     console.log('automation cron hits');
     
     await postAutomationWorker();
+    await automationPublishWorker();
   },
   null,
   false,

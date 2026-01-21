@@ -5,6 +5,10 @@ import {redis} from "@/lib/redis"
 import { postOnLinkedin } from "@/modules/post/post-publish/post-publish.service";
 import { cronPublishJob } from "./worker.cron";
 
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
+
 
 console.log("🚀 Worker started");
 
