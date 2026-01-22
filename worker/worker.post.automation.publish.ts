@@ -73,7 +73,7 @@ export async function automationPublishWorker() {
         },
         {
           jobId: `automation_publish_${row.run_id}`,
-          attempts: 5,
+          attempts: 20,
           backoff: { type: "exponential", delay: 30_000 },
           removeOnComplete: true,
           removeOnFail: false,

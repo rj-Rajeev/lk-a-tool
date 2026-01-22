@@ -13,6 +13,9 @@ export async function postOnLinkedin(id: number, userId: number) {
   const linkedinAccount = await getLinkedinAccessToken(userId);
   const postData: PostData | null = await getPostDraftById(id);
 
+  console.log('\n---------------------\n',linkedinAccount,'\n---------------------\n');
+  
+
   if (!postData) {
     return {
       success: false,
@@ -55,6 +58,10 @@ export async function postOnLinkedin(id: number, userId: number) {
     },
     body: JSON.stringify(payload),
   });
+
+  console.log("Status:", response.status);
+  console.log("Body:", await response.text());
+
 
   if (!response.ok) {
     const errorText = await response.text();

@@ -130,7 +130,7 @@ export default function DraftEditor({
     setContent("");
     setConfirmDelete(false);
 
-    router.push("/profile/linkedin/drafts");
+    router.push("/profile/linkedin/draft");
   }
 
   return (
