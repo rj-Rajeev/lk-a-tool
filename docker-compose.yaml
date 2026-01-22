@@ -44,7 +44,6 @@ services:
       DB_NAME: app_db
 
 
-
     restart: always
 
 volumes:
