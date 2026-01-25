@@ -1,19 +1,22 @@
 import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
+// Global safety net (production-safe)
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  process.exit(1); // crash fast, let supervisor restart
+});
+
+// Start BullMQ workers
 import "./publish/publish.worker";
+
+// Start cron
 import { publishCron } from "./cron/publish.cron";
-import { publishQueue } from "@/lib/queues/publish.queue";
 
 console.log("🚀 Worker booted");
-
-setTimeout(async () => {
-  console.log("🧪 Manual publish test");
-  await publishQueue.add("publish", {
-    runId: 999,
-    draftId: 999,
-    userId: 1,
-  });
-}, 3000);
 
 publishCron.start();

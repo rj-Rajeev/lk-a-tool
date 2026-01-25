@@ -5,10 +5,18 @@ import { automationPublishSelector } from "../automation/publish.selector";
 export const publishCron = new CronJob(
   "*/10 * * * * *",
   async () => {
-    console.log("⏰ Cron tick at", new Date());
+    try {
+      await postAutomationWorker();       // draft phase
+    } catch (err) {
+      // draft worker already persisted error
+      console.error("Draft automation error:", err);
+    }
 
-    await postAutomationWorker();       // create drafts
-    await automationPublishSelector();  // enqueue approved drafts
+    try {
+      await automationPublishSelector();  // enqueue phase
+    } catch (err) {
+      console.error("Publish selector error:", err);
+    }
   },
   null,
   false,

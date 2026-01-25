@@ -1,13 +1,7 @@
 import { db } from "@/lib/db";
 import { publishQueue } from "@/lib/queues/publish.queue";
 
-
 export async function automationPublishSelector() {
-  console.log("[AutomationPublishSelector] Checking approved drafts");
-  
-    const counts = await publishQueue.getJobCounts();
-    console.log("[PublishQueue counts]", counts);
-
   const [runs]: any = await db.query(`
     SELECT r.id, r.draft_id, s.user_id
     FROM post_automation_runs r
@@ -23,17 +17,6 @@ export async function automationPublishSelector() {
 
   if (!runs.length) return;
 
-  const runIds = runs.map((r: any) => r.id);
-
-  await db.query(
-    `
-    UPDATE post_automation_runs
-    SET in_progress = TRUE
-    WHERE id IN (?)
-    `,
-    [runIds]
-  );
-
   for (const run of runs) {
     await publishQueue.add(
       "publish",
@@ -43,14 +26,12 @@ export async function automationPublishSelector() {
         userId: run.user_id,
       },
       {
-        jobId: `automation_publish_${run.id}`,
-        attempts: 10,
+        jobId: `automation_publish_${run.id}`, // deterministic
+        attempts: 5,
         backoff: { type: "exponential", delay: 30000 },
         removeOnComplete: true,
         removeOnFail: false,
       }
     );
   }
-
-  console.log(`[AutomationPublishSelector] Enqueued ${runs.length}`);
 }

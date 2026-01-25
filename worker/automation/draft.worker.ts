@@ -6,42 +6,45 @@ import { generateLinkedInPost } from "@/modules/ai/ai.service";
 import { insertPostDraft } from "@/modules/post/post-draft/post-draft.repository";
 import { notifyDraftCreated } from "@/lib/sendDraftCreatedNotification";
 
+/**
+ * Draft Automation Worker
+ *
+ * Status lifecycle:
+ * PENDING → DRAFT_CREATED
+ *        ↘ FAILED
+ *
+ * Notes:
+ * - Cron-safe (no throws)
+ * - Errors persisted in DB
+ * - Idempotent & lock-safe
+ */
 export async function postAutomationWorker() {
-  let schedule: any;
-  let run: any;
+  let runId: number | null = null;
+  let step = "INIT";
 
   try {
-    console.log("[Worker] Looking for eligible automation schedule");
-
-    // 1️⃣ Pick ONE eligible schedule whose draft is NOT created today
+    /* 1. Pick one eligible schedule */
+    step = "PICK_SCHEDULE";
     const [schedules]: any = await db.query(`
-      SELECT s.*
+      SELECT s.id, s.user_id
       FROM post_automation_schedules s
       LEFT JOIN post_automation_runs r
         ON r.schedule_id = s.id
        AND r.run_date = CURDATE()
       WHERE s.is_active = TRUE
         AND CURDATE() BETWEEN s.start_date AND IFNULL(s.end_date, CURDATE())
-        AND CURTIME() >= DATE_SUB(
-          CAST(JSON_UNQUOTE(JSON_EXTRACT(s.times, '$[0]')) AS TIME),
-          INTERVAL 1 HOUR
-        )
-        AND (r.id IS NULL OR r.status IN ('PENDING', 'FAILED'))
+        AND CURTIME() >= CAST(JSON_UNQUOTE(JSON_EXTRACT(s.times, '$[0]')) AS TIME)
+        AND (r.id IS NULL OR r.status IN ('PENDING','FAILED'))
         AND (r.in_progress IS NULL OR r.in_progress = FALSE)
-      LIMIT 1;
+      LIMIT 1
     `);
 
-    if (!schedules.length) {
-      console.log("[Worker] No eligible schedule found");
-      return;
-    }
+    if (!schedules.length) return;
 
-    schedule = schedules[0];
-    console.log(
-      `[Worker] Picked schedule id=${schedule.id}, user=${schedule.user_id}`
-    );
+    const schedule = schedules[0];
 
-    // 2️⃣ Ensure TODAY'S run row exists (idempotent)
+    /* 2. Ensure today's run exists */
+    step = "ENSURE_RUN";
     await db.query(
       `
       INSERT IGNORE INTO post_automation_runs (schedule_id, run_date, status)
@@ -50,10 +53,11 @@ export async function postAutomationWorker() {
       [schedule.id]
     );
 
-    // 3️⃣ Lock today's run
+    /* 3. Lock today's run */
+    step = "LOCK_RUN";
     const [runs]: any = await db.query(
       `
-      SELECT *
+      SELECT id
       FROM post_automation_runs
       WHERE schedule_id = ?
         AND run_date = CURDATE()
@@ -64,52 +68,52 @@ export async function postAutomationWorker() {
       [schedule.id]
     );
 
-    if (!runs.length) {
-      console.log("[Worker] Run already processed or locked");
-      return;
-    }
+    if (!runs.length) return;
 
-    run = runs[0];
+    runId = runs[0].id;
 
-    await db.query(
+    const [lock]: any = await db.query(
       `
       UPDATE post_automation_runs
       SET in_progress = TRUE
       WHERE id = ?
+        AND in_progress = FALSE
       `,
-      [run.id]
+      [runId]
     );
 
-    console.log(`[Worker] Locked run id=${run.id}`);
+    if (lock.affectedRows !== 1) return;
 
-    // 4️⃣ Fetch prompt config
+    /* 4. Fetch prompt config */
+    step = "FETCH_PROMPT_CONFIG";
     const config = await getPromptConfigByUser(
       schedule.user_id,
       PROVIDERS.LINKEDIN
     );
 
-    // 5️⃣ Generate topic
+    /* 5. Generate topic */
+    step = "GENERATE_TOPIC";
     const topics = await generateLinkedInTopics(config);
-    if (!topics?.length) {
+    if (!topics || !topics.length) {
       throw new Error("No topics generated");
     }
 
     const topic = topics[0];
-    console.log("[Worker] Topic selected", topic);
 
-    // 6️⃣ Generate content
+    /* 6. Generate content */
+    step = "GENERATE_CONTENT";
     const content = await generateLinkedInPost(topic, config);
 
-    // 7️⃣ Save draft
+    /* 7. Save draft */
+    step = "SAVE_DRAFT";
     const draftId = await insertPostDraft(
       schedule.user_id,
       topic,
       content
     );
 
-    console.log(`[Worker] Draft saved id=${draftId}`);
-
-    // 8️⃣ Update run (draft created)
+    /* 8. Finalize run */
+    step = "FINALIZE_RUN";
     await db.query(
       `
       UPDATE post_automation_runs
@@ -117,47 +121,41 @@ export async function postAutomationWorker() {
         draft_created_at = NOW(),
         draft_id = ?,
         status = 'DRAFT_CREATED',
-        in_progress = FALSE
+        in_progress = FALSE,
+        error_step = NULL,
+        error_code = NULL,
+        error_message = NULL
       WHERE id = ?
       `,
-      [draftId, run.id]
+      [draftId, runId]
     );
 
-    // 9️⃣ Notify user (NON-BLOCKING)
-    notifyDraftCreated(schedule.user_id, draftId)
-      .then(() =>
-        console.log(`[Worker] Notification sent for draft=${draftId}`)
-      )
-      .catch(err =>
-        console.error(
-          `[Worker] Notification failed for draft=${draftId}`,
-          err
-        )
-      );
-
-    console.log(
-      `[Worker] Draft phase completed for schedule=${schedule.id}, run=${run.id}`
-    );
-
-  } catch (error) {
-    console.error("[Worker] Draft automation failed", {
-      scheduleId: schedule?.id,
-      runId: run?.id,
-      error,
-    });
-
-    if (run?.id) {
+    /* 9. Fire-and-forget notification */
+    notifyDraftCreated(schedule.user_id, draftId).catch(() => {});
+  } catch (err: any) {
+    if (runId) {
       await db.query(
         `
         UPDATE post_automation_runs
-        SET in_progress = FALSE,
-            status = 'FAILED'
+        SET
+          status = 'FAILED',
+          in_progress = FALSE,
+          error_step = ?,
+          error_code = ?,
+          error_message = ?
         WHERE id = ?
         `,
-        [run.id]
+        [
+          step,
+          err?.code || "UNEXPECTED_ERROR",
+          err?.message || String(err),
+          runId,
+        ]
       );
     }
+
+    // ❗ IMPORTANT:
+    // Do NOT throw — cron/interval workers must not crash.
+    return;
   }
 }
-
-console.log("[Worker] Post Automation Draft Worker loaded");
