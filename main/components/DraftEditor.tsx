@@ -133,6 +133,20 @@ export default function DraftEditor({
     router.push("/profile/linkedin/draft");
   }
 
+  async function publishDraft() {
+    if (!selectedId || !isApproved) return;
+    setSaving(true);
+
+    await fetch("/api/linkedin/publish", {
+      method: "POST",
+      body: JSON.stringify({ draftId: selectedId }),
+    });
+
+    setSaving(false);
+    
+    window.location.reload();
+  }
+
   return (
     <div className="min-h-screen bg-bg text-text px-4 py-4">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -277,6 +291,13 @@ export default function DraftEditor({
                   </button>
                 )}
 
+                <button
+                  onClick={publishDraft}
+                  disabled={saving}
+                  className="h-10 px-5 rounded-md bg-primary text-black text-sm font-medium disabled:opacity-40"
+                >
+                  {saving ? "Publishing…" : "Publish"}
+                </button>
                 <button
                   onClick={saveDraft}
                   disabled={saving || !isDirty || isApproved}
