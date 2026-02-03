@@ -37,11 +37,7 @@ services:
       - redis
       - db
     environment:
-      REDIS_HOST: redis
-      DB_HOST: db
-      DB_USER: app_user
-      DB_PASSWORD: apppass
-      DB_NAME: app_db
+    
 
 
     restart: always

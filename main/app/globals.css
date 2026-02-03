@@ -12,7 +12,9 @@
   /* =====================
      FONT SYSTEM
      ===================== */
-  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
