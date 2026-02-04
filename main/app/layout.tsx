@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/layout/Footer";
+import { Sidebar } from "@/components/dashboard/sidebar/Sidebar";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -74,12 +75,26 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}
     >
-      <body className="antialiased">
-      <Header />
-      <main className="pt-20">
-        {children}
-      </main>
-      <Footer/>
+      <body className="antialiased bg-[var(--color-bg)]">
+        {/* APP SHELL */}
+        <div className="flex min-h-screen flex-col">
+          {/* Header */}
+          <Header />
+
+          {/* App content area */}
+          <div className="relative flex flex-1">
+            {/* Sidebar */}
+            <Sidebar />
+
+            {/* Main content */}
+            <main className="flex-1 mt-20 px-4 py-6">
+              {children}
+            </main>
+          </div>
+        </div>
+
+        {/* Footer (OUTSIDE APP SHELL) */}
+        <Footer />
       </body>
     </html>
   );
