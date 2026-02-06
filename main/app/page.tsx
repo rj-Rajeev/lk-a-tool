@@ -10,7 +10,7 @@ import FinalCTA from "@/components/landing/FinalCTA";
 
 export default async function LandingPage() {
   const user = await getAuth();
-  if (user) redirect("/profile/linkedin");
+  if (user) redirect("/dashboard");
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] overflow-x-hidden">
 

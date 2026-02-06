@@ -71,31 +71,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable}`}>
       <body className="antialiased bg-[var(--color-bg)]">
-        {/* APP SHELL */}
-        <div className="flex min-h-screen flex-col">
-          {/* Header */}
-          <Header />
-
-          {/* App content area */}
-          <div className="relative flex flex-1">
-            {/* Sidebar */}
-            <Sidebar />
-
-            {/* Main content */}
-            <main className="flex-1 mt-20 px-4 py-6">
-              {children}
-            </main>
-          </div>
-        </div>
-
-        {/* Footer (OUTSIDE APP SHELL) */}
+        <Header />
+        <main className="mt-20">{children}</main>
         <Footer />
       </body>
     </html>
   );
 }
+
